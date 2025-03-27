@@ -8,6 +8,8 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     })
 
     it('preenche os campos obrigatórios e envia o formulário', () => {
+        cy.clock() //Congela o relógio do navegador
+
         const longText = Cypress._.repeat('abcdefghijklmnopqrstuvxyz', 10)
 
         cy.get('#firstName').type('Maria Flor')
@@ -19,9 +21,15 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('.success > strong')
             .should('be.visible')
             .and('contain', 'Mensagem enviada com sucesso.')
+
+        cy.tick(3000) //Avança 3 segundos para não precisar esperar a mensagem 
+
+        cy.get('.success > strong').should('not.be.visible')
     })
 
     it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', () => {
+        cy.clock()
+
         cy.get('#firstName').type('João Maria')
         cy.get('#lastName').type('da Silva')
         cy.get('#email').type('joao.gmail.com')
@@ -31,6 +39,10 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('.error > strong')
             .should('be.visible')
             .and('contain', 'Valide os campos obrigatórios')
+
+        cy.tick(3000)
+
+        cy.get('.error > strong').should('not.be.visible')
     })
 
     it('campo telefone permanece vazio quando não preenchido por valor não-numérico', () => {
@@ -40,6 +52,8 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     })
 
     it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', () => {
+        cy.clock()
+
         cy.get('#firstName').type('Guilhermina')
         cy.get('#lastName').type('Soares')
         cy.get('#email').type('mina@gmail.com')
@@ -50,6 +64,10 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.get('.error > strong')
             .should('be.visible')
             .and('contain', 'Valide os campos obrigatórios')
+
+        cy.tick(3000)
+
+        cy.get('.error > strong').should('not.be.visible')
     })
 
     it('preenche e limpa os campos nome, sobrenome, email e telefone', () => {
@@ -82,11 +100,17 @@ describe('Central de Atendimento ao Cliente TAT', () => {
     })
 
     it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', () => {
+        cy.clock()
+
         cy.contains('button', 'Enviar').click()
 
         cy.get('.error > strong')
             .should('be.visible')
             .and('contain', 'Valide os campos obrigatórios')
+
+        cy.tick(3000)
+
+        cy.get('.error > strong').should('not.be.visible')
     })
 
     it('envia o formuário com sucesso usando um comando customizado', () => {
@@ -173,19 +197,37 @@ describe('Central de Atendimento ao Cliente TAT', () => {
 
     it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', () => {
         cy.contains('a', 'Política de Privacidade')
-        .should('have.attr', 'href', 'privacy.html')
-        .and('have.attr', 'target', '_blank')
-            
+            .should('have.attr', 'href', 'privacy.html')
+            .and('have.attr', 'target', '_blank')
+
     })
 
     it('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
         cy.contains('a', 'Política de Privacidade')
-        .invoke('removeAttr', 'target')
-        .click()
+            .invoke('removeAttr', 'target')
+            .click()
 
         cy.contains('h1', 'CAC TAT - Política de Privacidade')
             .should('be.visible')
     })
 
-        
+    it('exibe e oculta as mensagens de sucesso e erro usando .invoke()', () => {
+        cy.get('.success')
+          .should('not.be.visible')
+          .invoke('show')
+          .should('be.visible')
+          .and('contain', 'Mensagem enviada com sucesso.')
+          .invoke('hide')
+          .should('not.be.visible')
+        cy.get('.error')
+          .should('not.be.visible')
+          .invoke('show')
+          .should('be.visible')
+          .and('contain', 'Valide os campos obrigatórios!')
+          .invoke('hide')
+          .should('not.be.visible')
+      })
+      
+
+
 })
